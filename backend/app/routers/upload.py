@@ -1,6 +1,6 @@
 # routers/upload_router.py
 from sqlalchemy.future import select
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, UploadFile, File, Depends, HTTPException
 from requests import Session
 from config.firebase import get_current_user  # <-- Important: use the same
 from firebase_admin import auth
@@ -11,6 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.database import get_db
 from schemas.user import User
+from services.resume_service import save_parsed_resume_to_mongo
+from utils.file_reader import extract_text
+from utils.dial_parser import parse_resume_with_dial
 
 router = APIRouter()
 
@@ -41,14 +44,15 @@ def generate_unique_filename(original_filename: str, user_uid: str) -> str:
     return f"{user_uid}-resume-{timestamp}-{unique_id}.{ext}"
 
 
+from fastapi import BackgroundTasks
+
 @router.post("/resume")
 async def upload_resume(
-    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks,  # Remember : In python Non-default argument (& required) follows default argument
+    file: UploadFile = File(...),        # ✅ default after
     current_user: dict = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)  # ✅ AsyncSession
+    db: AsyncSession = Depends(get_db)
 ):
-    # print("Current user UID:", current_user.uid)
-
     allowed_mimes = [
         "application/pdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -72,29 +76,39 @@ async def upload_resume(
 
     file_url = f"http://localhost:4566/{BUCKET_NAME}/{s3_key}"
 
-    # ✅ Update user's resume_url asynchronously
+    # Update user's resume_url
     result = await db.execute(select(User).where(User.uid == uid))
     user = result.scalars().first()
 
     if user:
         user.resume_url = file_url
-        await db.commit()
-        await db.refresh(user)
+        try:
+            await db.commit()
+            await db.refresh(user)
+        except Exception:
+            await db.rollback()
+            raise HTTPException(status_code=500, detail="Database error while updating resume URL.")
     else:
         raise HTTPException(status_code=404, detail="User not found.")
+
+    # Background task
+    background_tasks.add_task(
+        process_resume_background_task,
+        file_content,
+        file.content_type,
+        uid
+    )
 
     return {"message": "Resume uploaded successfully!", "file_url": file_url}
 
 
-from db.mongo import database
+async def process_resume_background_task(file_content: bytes, content_type: str, user_id: str):
+    """Extract text, parse via LLM, and save parsed JSON into Mongo."""
+    # 1. Extract plain text
+    text = await extract_text(file_content, content_type)
 
-router = APIRouter()
+    # 2. Parse with DIAL LLM
+    parsed_json = await parse_resume_with_dial(text)
 
-@router.get("/test")
-async def test_mongo():
-    users_collection = database.get_collection("users")
-
-    # Mongo's new async operations
-    user = await users_collection.find_one({"name": "John Doe"})
-    
-    return {"user": user}
+    # 3. Save parsed JSON into MongoDB
+    await save_parsed_resume_to_mongo(user_id, parsed_json)

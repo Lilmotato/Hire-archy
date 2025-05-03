@@ -9,7 +9,7 @@ from firebase_admin import credentials, auth
 logger = logging.getLogger(__name__)
 
 # --- Firebase Initialization ---
-SERVICE_ACCOUNT_KEY_PATH = "src/config/serviceAccountKey.json"
+SERVICE_ACCOUNT_KEY_PATH = "app/config/serviceAccountKey.json"
 
 try:
     if not os.path.exists(SERVICE_ACCOUNT_KEY_PATH):

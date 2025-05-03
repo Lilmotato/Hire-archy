@@ -4,13 +4,13 @@ import os
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-
+from routers import upload, users
+from routers.auth import router as auth_router
 from config.settings import settings
 from db.database import Base, engine  # Your Async SQLAlchemy setup for Postgres
 from db.mongo import ping_db  # MongoDB connection checker
 from utils.logger import setup_logger
 
-from routers import auth, upload, users
 
 # Initialize logger
 logger = setup_logger()
@@ -43,7 +43,7 @@ app = FastAPI(
 )
 
 # Include Routers
-app.include_router(auth.router)
+app.include_router(auth_router)
 app.include_router(users.router)
 app.include_router(upload.router, tags=["Resume Upload"])
 
@@ -58,6 +58,3 @@ async def health_check():
     """Health check endpoint for deployment monitoring."""
     return {"status": "ok"}
 
-# Local development entry point
-if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

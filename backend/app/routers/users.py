@@ -46,6 +46,7 @@ async def update_my_profile(
             user.full_name = update_data.full_name
         if update_data.phone_number is not None:
             user.phone_number = update_data.phone_number
+        #location, yoe, key-skills
 
         await db.commit()
         await db.refresh(user)

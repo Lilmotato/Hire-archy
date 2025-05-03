@@ -81,6 +81,7 @@ async def login_service(user_data: LoginSchema) -> dict:
             "returnSecureToken": True
         })
 
+    print(response.json())
     if response.status_code != 200:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -91,10 +92,11 @@ async def login_service(user_data: LoginSchema) -> dict:
     decoded_token = auth.verify_id_token(id_token)
     role = decoded_token.get("role")
 
-    if role != "candidate":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not have candidate access."
-        )
+    # if role != "candidate":
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail="User does not have candidate access."
+    #     )
 
     return {"token": id_token}
+
