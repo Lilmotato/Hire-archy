@@ -1,7 +1,7 @@
 # app/routers/auth.py
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from db.database import get_db
-from models.auth import LoginSchema, SignUpSchema, UserSignupResponse
+from schemas.auth import LoginSchema, SignUpSchema, UserSignupResponse
 from services.firebase_service import signup_candidate_service, login_service
 from sqlalchemy.ext.asyncio import AsyncSession
 

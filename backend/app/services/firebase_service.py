@@ -4,7 +4,7 @@ import requests
 from firebase_admin import auth
 from fastapi import Depends, HTTPException, status
 from db.database import get_db
-from models.auth import SignUpSchema, UserSignupResponse, LoginSchema
+from schemas.auth import SignUpSchema, UserSignupResponse, LoginSchema
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
