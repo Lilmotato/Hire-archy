@@ -3,14 +3,14 @@ import os
 import requests
 from firebase_admin import auth
 from fastapi import Depends, HTTPException, status
+from schemas.user import User
 from db.database import get_db
-from schemas.auth import SignUpSchema, UserSignupResponse, LoginSchema
+from models.auth import SignUpSchema, UserSignupResponse, LoginSchema
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
 
 
-from schemas.user import User
 
 load_dotenv()
 
@@ -90,13 +90,13 @@ async def login_service(user_data: LoginSchema) -> dict:
 
     id_token = response.json()["idToken"]
     decoded_token = auth.verify_id_token(id_token)
-    role = decoded_token.get("role")
+    # role = decoded_token.get("role")
 
-    # if role != "candidate":
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="User does not have candidate access."
-    #     )
+    # # if role != "candidate":
+    # #     raise HTTPException(
+    # #         status_code=status.HTTP_403_FORBIDDEN,
+    # #         detail="User does not have candidate access."
+    # #     )
 
     return {"token": id_token}
 

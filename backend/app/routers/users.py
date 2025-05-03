@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from db.database import get_db
-from schemas.user import UserUpdateSchema, UserProfileResponse  # Pydantic schemas from models
+from models.user import UserUpdateSchema, UserProfileResponse  # Pydantic schemas from models
 from schemas.user import User  # ORM model (SQLAlchemy) from schemas
 from config.firebase import get_current_user
-from schemas.auth import UserInfo  # Assuming this is your current user response Pydantic model
+from models.auth import UserInfo  # Assuming this is your current user response Pydantic model
 
 router = APIRouter(prefix="/users", tags=["Users"])
 

@@ -2,15 +2,14 @@
 from sqlalchemy.future import select
 from fastapi import APIRouter, BackgroundTasks, UploadFile, File, Depends, HTTPException
 from requests import Session
+from schemas.user import User
 from config.firebase import get_current_user  # <-- Important: use the same
 from firebase_admin import auth
 import boto3
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from db.database import get_db
-from schemas.user import User
 from services.resume_service import save_parsed_resume_to_mongo
 from utils.file_reader import extract_text
 from utils.dial_parser import parse_resume_with_dial
@@ -53,6 +52,14 @@ async def upload_resume(
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
+     # 🔒 Check if user is a candidate
+    role = current_user.get("role")
+    if role != "candidate":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access restricted: only candidates can upload resumes."
+        )
+    
     allowed_mimes = [
         "application/pdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
