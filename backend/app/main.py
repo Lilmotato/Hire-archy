@@ -4,7 +4,7 @@ import os
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from routers import upload, users
+from routers import upload, users, jobs
 from routers.auth import router as auth_router
 from config.settings import settings
 from db.database import Base, engine  # Your Async SQLAlchemy setup for Postgres
@@ -46,6 +46,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(users.router)
 app.include_router(upload.router, tags=["Resume Upload"])
+app.include_router(jobs.router, tags = ["Jobs"])
 
 # Public Endpoints
 @app.get("/", tags=["Public"])

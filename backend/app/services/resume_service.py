@@ -4,6 +4,7 @@ from utils.dial_parser import parse_resume_with_dial
 from db.mongo import get_mongo_client
 
 
+
 async def process_resume_upload(file_content: bytes, content_type: str, candidate_id: str):
     """Extract text, parse using LLM, and update candidate record."""
     
@@ -23,9 +24,7 @@ async def process_resume_upload(file_content: bytes, content_type: str, candidat
         {"$set": {"parsed_resume": parsed_resume}},
         upsert=True  # ✅ Upsert (important) so first-time users are created
     )
-# services/candidate_service.py
 
-from db.mongo import get_mongo_client
 
 async def save_parsed_resume_to_mongo(user_id: str, parsed_resume: dict):
     """Save parsed resume JSON under user ID."""

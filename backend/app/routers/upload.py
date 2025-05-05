@@ -1,4 +1,5 @@
 # routers/upload_router.py
+from grpc import Status
 from sqlalchemy.future import select
 from fastapi import APIRouter, BackgroundTasks, UploadFile, File, Depends, HTTPException
 from requests import Session
@@ -56,7 +57,7 @@ async def upload_resume(
     role = current_user.get("role")
     if role != "candidate":
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="Access restricted: only candidates can upload resumes."
         )
     
