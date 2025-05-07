@@ -1,9 +1,9 @@
-
+import logging
 from utils.file_reader import extract_text
 from utils.dial_parser import parse_resume_with_dial
 from db.mongo import get_mongo_client
 
-
+logger = logging.getLogger(__name__)
 
 async def process_resume_upload(file_content: bytes, content_type: str, candidate_id: str):
     """Extract text, parse using LLM, and update candidate record."""
@@ -39,10 +39,9 @@ async def save_parsed_resume_to_mongo(user_id: str, parsed_resume: dict):
             upsert=True
         )
         if result.upserted_id:
-            print(f"Inserted new document for user_id: {user_id}")
+            logger.info(f"✅ Inserted new document for user_id: {user_id}")
         else:
-            print(f"Updated document for user_id: {user_id}")
+            logger.info(f"✅ Updated existing document for user_id: {user_id}")
     except Exception as e:
-        import logging
-        logging.error(f"Failed to save parsed resume for {user_id}: {e}")
+        logger.exception(f"❌ Failed to save parsed resume for user_id={user_id}")
         raise

@@ -2,8 +2,12 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 class UserUpdateSchema(BaseModel):
-    full_name: Optional[str] = None
-    phone_number: Optional[str] = None
+    full_name: Optional[str]
+    phone_number: Optional[str]
+    location: Optional[str]
+    years_of_experience: Optional[int]
+    key_skills: Optional[list[str]]
+
     
 
 # For recruiter to view user profile

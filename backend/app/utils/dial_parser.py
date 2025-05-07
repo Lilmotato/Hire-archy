@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 from dotenv import load_dotenv
@@ -41,7 +42,9 @@ def get_text_embedding(text: str) -> list[float]:
 
 
 async def parse_resume_with_dial(resume_text: str) -> dict:
-    """Send resume text to DIAL LLM and get structured JSON."""
+    """
+    Send resume text to DIAL LLM and get structured Python dict (parsed resume).
+    """
 
     url = f"https://ai-proxy.lab.epam.com/openai/deployments/gpt-4/chat/completions?api-version={DIAL_API_VERSION}"
     headers = {
@@ -61,11 +64,9 @@ Given the resume text below, extract the following fields as JSON:
 - Education (list)
 
 Resume Text:
-\"\"\"
-{resume_text}
-\"\"\"
+\"\"\"{resume_text}\"\"\"
 
-Respond with only valid JSON, no extra text.
+Respond with only valid JSON. Do not include Markdown formatting or explanation.
 """
 
     payload = {
@@ -79,8 +80,15 @@ Respond with only valid JSON, no extra text.
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code == 200:
-        parsed_json = response.json()["choices"][0]["message"]["content"]
-        return parsed_json
-    else:
-        raise Exception(f"DIAL parsing failed: {response.text}")
+        content = response.json()["choices"][0]["message"]["content"].strip()
 
+        try:
+            parsed = json.loads(content)  
+            if not isinstance(parsed, dict):
+                raise ValueError("Parsed resume is not a dictionary.")
+            return parsed
+        except json.JSONDecodeError as e:
+            raise ValueError(f"❌ Invalid JSON from DIAL: {e}\n---\n{content}")
+
+    else:
+        raise Exception(f"❌ DIAL parsing failed: {response.text}")

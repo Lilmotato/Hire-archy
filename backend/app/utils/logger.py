@@ -1,9 +1,16 @@
 # app/utils/logger.py
 import logging
 
-def setup_logger():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-    return logging.getLogger(__name__)
+def setup_logger(name: str = __name__):
+    logger = logging.getLogger(name)
+
+    if not logger.handlers:  # Prevent adding multiple handlers
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+
+    return logger

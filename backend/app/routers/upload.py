@@ -116,7 +116,7 @@ async def process_resume_background_task(file_content: bytes, content_type: str,
     text = await extract_text(file_content, content_type)
 
     # 2. Parse with DIAL LLM
-    parsed_json = await parse_resume_with_dial(text)
+    parsed_resume = await parse_resume_with_dial(text)
 
     # 3. Save parsed JSON into MongoDB
-    await save_parsed_resume_to_mongo(user_id, parsed_json)
+    await save_parsed_resume_to_mongo(user_id, parsed_resume)
