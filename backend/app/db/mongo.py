@@ -1,4 +1,4 @@
-# src/database/mongo.py
+# app/db/mongo.py
 
 import os
 from dotenv import load_dotenv
@@ -22,9 +22,9 @@ async def ping_db():
     """Ping MongoDB on startup to verify connection."""
     try:
         await mongo_client.admin.command("ping")
-        logger.info("✅ MongoDB connection successful.")
+        logger.info("MongoDB connection successful.")
     except Exception as e:
-        logger.error(f"❌ MongoDB connection failed: {e}")
+        logger.error(f"MongoDB connection failed: {e}")
 
 def get_mongo_client() -> AsyncMongoClient:
     """Returns the MongoDB client instance for dependency injection."""

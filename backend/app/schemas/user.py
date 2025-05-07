@@ -1,6 +1,7 @@
 # models/user.py
-from sqlalchemy import Column, Integer, String, Text, TIMESTAMP
+from sqlalchemy import ARRAY, Column, Integer, String, Text, TIMESTAMP
 from sqlalchemy.sql import func
+from pgvector.sqlalchemy import Vector
 from db.database import Base
 
 class User(Base):
@@ -14,4 +15,10 @@ class User(Base):
     role = Column(String(20), nullable=False)
     resume_url = Column(Text)
     created_at = Column(TIMESTAMP, server_default=func.now())
+
+    # pgvector
+    key_skills = Column(ARRAY(String), default=[])
+    location = Column(String)
+    years_of_experience = Column(Integer)
+    embedding = Column(Vector(1536))  #For semantic search
 

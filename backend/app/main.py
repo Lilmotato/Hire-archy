@@ -1,6 +1,7 @@
 # app/main.py
 
 import os
+from sqlalchemy import text
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -18,28 +19,46 @@ logger = setup_logger()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and Shutdown events."""
-    
+
     # Create upload directory if it doesn't exist
     UPLOAD_DIRECTORY = "uploaded_resumes"
     os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 
-    # Connect to Postgres (create tables)
+    # Connect to Postgres
     async with engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        # Create tables after the extension
         await conn.run_sync(Base.metadata.create_all)
-    logger.info("✅ PostgreSQL tables created.")
+    logger.info("PostgreSQL tables and pgvector extension ready.")
 
     # Connect to MongoDB (ping)
     await ping_db()
 
-    logger.info("🚀 Hire-archy backend started successfully.")
+    logger.info("Hire-archy backend started successfully.")
     yield
-    logger.info("🛑 Hire-archy backend is shutting down.")
+    logger.info("Hire-archy backend is shutting down.")
 
 # Initialize FastAPI app
 app = FastAPI(
     title="Hire-archy",
     version="1.0.0",
     lifespan=lifespan
+)
+
+# Allow origins (update with your actual frontend URL)
+origins = [
+    "http://localhost:3000",  # Next.js dev server
+    "https://your-frontend-domain.com",  # Add production URL when needed
+]
+
+from fastapi.middleware.cors import CORSMiddleware
+# Add middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allow specific origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 # Include Routers

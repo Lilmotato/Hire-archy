@@ -1,4 +1,5 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -28,7 +29,7 @@ async def read_users_me(current_user: dict = Depends(get_current_user)):
     )
 
 
-async def generate_and_store_summary(user: User):
+async def generate_and_store_summary(user: User, db: AsyncSession):
     try:
         logger.info(f"📦 Starting summary generation for UID: {user.uid}")
 
@@ -44,21 +45,16 @@ async def generate_and_store_summary(user: User):
         embedding_vector = get_text_embedding(summary_text)
         logger.info(f"✅ Embedding generated for UID: {user.uid}")
 
-        mongo = get_mongo_client()
-        user_summaries = mongo["mydb"]["user_summaries"]
-        result = await user_summaries.update_one(
-            {"user_id": user.uid},
-            {
-                "$set": {
-                    "summary_text": summary_text.strip(),
-                    "embedding_vector": embedding_vector
-                }
-            },
-            upsert=True
+        await db.execute(
+            update(User)
+            .where(User.uid == user.uid)
+            .values(embedding=embedding_vector)
         )
-        logger.info(f"📌 Mongo update success UID {user.uid}: {result.raw_result}")
+        await db.commit()
+        logger.info(f"📌 PostgreSQL update success for UID {user.uid}")
     except Exception as e:
         logger.error(f"❌ Embedding save failed for UID {user.uid}: {e}")
+        raise
 
 
 @router.put("/me", response_model=UserUpdateSchema)

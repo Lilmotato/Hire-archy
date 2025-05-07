@@ -2,11 +2,10 @@ from sqlalchemy import Column, String, Integer, Boolean, DateTime, ARRAY
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 import uuid
+from pgvector.sqlalchemy import Vector
 from sqlalchemy.dialects.postgresql import UUID
 from db.database import Base
-
-
-
+    
 class JobListing(Base):
     __tablename__ = "job_listings"
 
@@ -18,6 +17,9 @@ class JobListing(Base):
     location = Column(String, nullable=False)
     company_name = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    recruiter_id = Column(String, nullable=False)  # 🔑 for querying
-    job_summary = Column(String, nullable=True)  # Can be populated by LLM
-    
+    recruiter_id = Column(String, nullable=False)
+    job_summary = Column(String, nullable=True)
+
+    # New fields
+    embedding = Column(Vector(1536))  # For matching candidates to job
+    applied_user_ids = Column(ARRAY(Integer), default=[])  # Recruiter candidate pool
