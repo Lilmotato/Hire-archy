@@ -8,19 +8,18 @@ from db.mongo import get_mongo_client
 from utils.dial_parser import get_text_embedding
 from db.database import get_db
 from models.user import UserUpdateSchema
-from schemas.user import User  # ORM model (SQLAlchemy) from schemas
+from schemas.user import User 
 from config.firebase import get_current_user
-from models.auth import UserInfo  # Assuming this is your current user response Pydantic model
+from models.auth import UserInfo  
 from utils.logger import setup_logger
 
-  # ✅ Logging utility
 router = APIRouter(prefix="/users", tags=["Users"])
-logger = setup_logger(__name__)  # ✅ Named logger per module
+logger = setup_logger(__name__)  
 
 
-# 🚀 Get current logged-in user details
 @router.get("/me", response_model=UserInfo)
 async def read_users_me(current_user: dict = Depends(get_current_user)):
+    logger.info(f"👤 Fetching current user info for UID: {current_user.get('uid')}")
     return UserInfo(
         uid=current_user.get("uid", "N/A"),
         email=current_user.get("email"),
@@ -34,16 +33,15 @@ async def generate_and_store_summary(user: User, db: AsyncSession):
         logger.info(f"📦 Starting summary generation for UID: {user.uid}")
 
         summary_text = (
-            f"UID: {user.uid}\n"
             f"Location: {user.location or 'N/A'}\n"
             f"Years of Experience: {user.years_of_experience or 'N/A'}\n"
             f"Key Skills: {', '.join(user.key_skills or [])}"
         )
 
-        logger.debug(f"📝 Summary:\n{summary_text}")
+        logger.debug(f"📝 Summary text for embedding:\n{summary_text}")
 
         embedding_vector = get_text_embedding(summary_text)
-        logger.info(f"✅ Embedding generated for UID: {user.uid}")
+        logger.info(f"🧠 Embedding generated for UID: {user.uid}")
 
         await db.execute(
             update(User)
@@ -51,7 +49,7 @@ async def generate_and_store_summary(user: User, db: AsyncSession):
             .values(embedding=embedding_vector)
         )
         await db.commit()
-        logger.info(f"📌 PostgreSQL update success for UID {user.uid}")
+        logger.info(f"✅ Embedding stored successfully for UID: {user.uid}")
     except Exception as e:
         logger.error(f"❌ Embedding save failed for UID {user.uid}: {e}")
         raise
@@ -65,18 +63,22 @@ async def update_my_profile(
     current_user: dict = Depends(get_current_user)
 ):
     try:
-        logger.info(f"🔄 Updating profile for UID: {current_user['uid']}")
+        uid = current_user['uid']
+        logger.info(f"🔄 Updating profile for UID: {uid}")
 
-        result = await db.execute(select(User).where(User.uid == current_user["uid"]))
+        result = await db.execute(select(User).where(User.uid == uid))
         user = result.scalars().first()
         if not user:
-            logger.warning(f"User not found: {current_user['uid']}")
+            logger.warning(f"⚠️ User not found: {uid}")
             raise HTTPException(status_code=404, detail="User not found.")
 
+        logger.debug(f"📂 Fetching parsed resume from MongoDB for UID: {uid}")
         mongo = get_mongo_client()
         parsed_doc = await mongo["mydb"]["Candidates"].find_one({"uid": user.uid})
         raw_parsed = parsed_doc.get("parsed_resume", {}) if parsed_doc else {}
         parsed_resume = json.loads(raw_parsed) if isinstance(raw_parsed, str) else raw_parsed
+
+        logger.debug(f"🔍 Parsed resume data: {parsed_resume}")
 
         user.full_name = update_data.full_name or parsed_resume.get("full_name")
         user.phone_number = update_data.phone_number or parsed_resume.get("phone_number")
@@ -85,18 +87,21 @@ async def update_my_profile(
 
         if update_data.key_skills:
             user.key_skills = update_data.key_skills
+            logger.debug(f"✅ Using provided key skills for UID: {uid}")
         elif "skills" in parsed_resume:
             user.key_skills = parsed_resume["skills"]
+            logger.debug(f"📋 Fallback to parsed skills for UID: {uid}")
 
         await db.commit()
         await db.refresh(user)
-        logger.info(f"✅ SQL profile updated for UID: {user.uid}")
+        logger.info(f"💾 SQL profile updated for UID: {user.uid}")
 
-        background_tasks.add_task(generate_and_store_summary, user)
+        background_tasks.add_task(generate_and_store_summary, user, db)
+        logger.info(f"📥 Background task scheduled for embedding UID: {user.uid}")
         return update_data
 
     except Exception as e:
-        logger.exception(f"❌ Update failed for UID: {current_user['uid']}")
+        logger.exception(f"❗ Update failed for UID: {current_user['uid']}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update profile: {str(e)}"

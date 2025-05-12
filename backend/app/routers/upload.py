@@ -3,6 +3,8 @@ from grpc import Status
 from sqlalchemy.future import select
 from fastapi import APIRouter, BackgroundTasks, UploadFile, File, Depends, HTTPException
 from requests import Session
+from config.s3_client import get_s3_client
+from db.mongo import get_mongo_client
 from schemas.user import User
 from config.firebase import get_current_user  # <-- Important: use the same
 from firebase_admin import auth
@@ -19,13 +21,7 @@ router = APIRouter()
 
 # Setup S3
 BUCKET_NAME = "my-resume-bucket"
-s3 = boto3.client(
-    's3',
-    endpoint_url="http://localhost:4566",
-    aws_access_key_id="test",
-    aws_secret_access_key="test",
-    region_name="us-east-1"
-)
+s3 = get_s3_client()
 
 # Helper to create bucket if missing
 def create_bucket_if_not_exists(bucket_name):
@@ -49,7 +45,7 @@ from fastapi import BackgroundTasks
 @router.post("/resume")
 async def upload_resume(
     background_tasks: BackgroundTasks,  # Remember : In python Non-default argument (& required) follows default argument
-    file: UploadFile = File(...),        # ✅ default after
+    file: UploadFile = File(...),        
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -120,3 +116,19 @@ async def process_resume_background_task(file_content: bytes, content_type: str,
 
     # 3. Save parsed JSON into MongoDB
     await save_parsed_resume_to_mongo(user_id, parsed_resume)
+
+@router.get("/resume/{user_id}")
+async def get_parsed_resume(user_id: str):
+    """
+    Fetch parsed resume data for a given user_id.
+    """
+    mongo_client = get_mongo_client()
+    db = mongo_client["mydb"]
+    candidates = db["Candidates"]
+
+    document = await candidates.find_one({"uid": user_id})
+
+    if not document or "parsed_resume" not in document:
+        raise HTTPException(status_code=404, detail="Parsed resume not found")
+    return {"user_id": user_id, "parsed_resume": document["parsed_resume"]}
+

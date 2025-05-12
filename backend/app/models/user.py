@@ -9,8 +9,6 @@ class UserUpdateSchema(BaseModel):
     key_skills: Optional[list[str]]
 
     
-
-# For recruiter to view user profile
 class UserProfileResponse(BaseModel):
     uid: str
     email: EmailStr

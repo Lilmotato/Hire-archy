@@ -22,3 +22,4 @@ class User(Base):
     years_of_experience = Column(Integer)
     embedding = Column(Vector(1536))  #For semantic search
 
+    

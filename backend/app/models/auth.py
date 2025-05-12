@@ -6,10 +6,9 @@ class UserSignupResponse(BaseModel):
     role: str
     message: str
 
-# Added for the /users/me endpoint
 class UserInfo(BaseModel):
     uid: str
-    email: EmailStr | None = None # Email might not always be present
+    email: EmailStr | None = None 
     role: str | None = None # Role from custom claims
     email_verified: bool | None = None
 

@@ -3,7 +3,6 @@ from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
 
-# 🚫 Recruiter ID & job_summary are set by backend, not user
 class JobListingCreate(BaseModel):
     title: str = Field(..., example="Senior Backend Engineer")
     description: str = Field(..., example="Work on scalable backend systems...")
@@ -13,7 +12,6 @@ class JobListingCreate(BaseModel):
     company_name: str = Field(..., example="TechCorp")
 
 
-# ✅ Used for PATCH endpoint
 class JobListingUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
@@ -23,7 +21,6 @@ class JobListingUpdate(BaseModel):
     company_name: Optional[str] = None
 
 
-# ✅ Full output model with metadata
 class JobListingOut(BaseModel):
     id: UUID
     title: str

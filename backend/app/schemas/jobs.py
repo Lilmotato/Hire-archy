@@ -22,4 +22,4 @@ class JobListing(Base):
 
     # New fields
     embedding = Column(Vector(1536))  # For matching candidates to job
-    applied_user_ids = Column(ARRAY(Integer), default=[])  # Recruiter candidate pool
+    applied_user_ids = Column(ARRAY(String), default=[])  # Recruiter candidate pool

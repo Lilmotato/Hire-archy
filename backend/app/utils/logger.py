@@ -2,6 +2,7 @@
 import logging
 
 def setup_logger(name: str = __name__):
+    logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(name)
 
     if not logger.handlers:  # Prevent adding multiple handlers

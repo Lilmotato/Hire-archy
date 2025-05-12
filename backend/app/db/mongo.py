@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 from pymongo import server_api
 from pymongo import AsyncMongoClient
 
-from utils.logger import setup_logger  # <<< your utils/logger.py
+from utils.logger import setup_logger  
 logger = setup_logger()
 
 load_dotenv()
 
 MONGODB_URI = os.getenv("MONGODB_URI")
 
-# Create the AsyncMongoClient instance
+
 mongo_client: AsyncMongoClient = AsyncMongoClient(
     MONGODB_URI,
     server_api=server_api.ServerApi(version="1", strict=True, deprecation_errors=True)

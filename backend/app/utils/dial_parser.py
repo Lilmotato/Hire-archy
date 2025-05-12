@@ -32,11 +32,11 @@ def get_text_embedding(text: str) -> list[float]:
         response.raise_for_status()
         data = response.json()
         embedding = data["data"][0]["embedding"]
-        print(f"✅ Received embedding of length {len(embedding)}")
-        print(f"📊 First 10 values: {embedding[:10]}") #testing 
+        print(f"Received embedding of length {len(embedding)}")
+        print(f"First 10 values: {embedding[:10]}") #testing 
         return embedding
     except Exception as e:
-        print("❌ Error parsing response:")
+        print("Error parsing response:")
         print(response.text)
         raise RuntimeError("Failed to get text embedding") from e
 

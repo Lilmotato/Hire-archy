@@ -16,7 +16,7 @@ load_dotenv()
 
 async def signup_candidate_service(
     user_data: SignUpSchema,
-    db: AsyncSession   # <- No Depends here. Just a parameter
+    db: AsyncSession  
 ) -> UserSignupResponse:
     try:
         # Create Firebase user
@@ -41,7 +41,7 @@ async def signup_candidate_service(
         )
 
         db.add(user_record)
-        await db.commit()       # ✅ use await because it's AsyncSession
+        await db.commit()       #use await because it's AsyncSession
         await db.refresh(user_record)
 
         return UserSignupResponse(
@@ -90,13 +90,6 @@ async def login_service(user_data: LoginSchema) -> dict:
 
     id_token = response.json()["idToken"]
     decoded_token = auth.verify_id_token(id_token)
-    # role = decoded_token.get("role")
-
-    # # if role != "candidate":
-    # #     raise HTTPException(
-    # #         status_code=status.HTTP_403_FORBIDDEN,
-    # #         detail="User does not have candidate access."
-    # #     )
 
     return {"token": id_token}
 
