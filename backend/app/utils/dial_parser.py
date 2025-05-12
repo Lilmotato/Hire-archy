@@ -76,7 +76,6 @@ Respond with only valid JSON. Do not include Markdown formatting or explanation.
         "temperature": 0.2,
         "max_tokens": 1200
     }
-
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code == 200:
@@ -88,7 +87,7 @@ Respond with only valid JSON. Do not include Markdown formatting or explanation.
                 raise ValueError("Parsed resume is not a dictionary.")
             return parsed
         except json.JSONDecodeError as e:
-            raise ValueError(f"❌ Invalid JSON from DIAL: {e}\n---\n{content}")
-
+            raise ValueError(f"Invalid JSON from DIAL: {e}\n---\n{content}")
+        
     else:
-        raise Exception(f"❌ DIAL parsing failed: {response.text}")
+        raise Exception(f"DIAL parsing failed: {response.text}")

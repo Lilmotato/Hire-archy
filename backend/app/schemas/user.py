@@ -1,5 +1,5 @@
 # models/user.py
-from sqlalchemy import ARRAY, Column, Integer, String, Text, TIMESTAMP
+from sqlalchemy import ARRAY, Boolean, Column, Integer, String, Text, TIMESTAMP
 from sqlalchemy.sql import func
 from pgvector.sqlalchemy import Vector
 from db.database import Base
@@ -21,5 +21,5 @@ class User(Base):
     location = Column(String)
     years_of_experience = Column(Integer)
     embedding = Column(Vector(1536))  #For semantic search
-
+    profile_completed = Column(Boolean, default=False)
     

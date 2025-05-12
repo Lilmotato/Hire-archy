@@ -65,6 +65,14 @@ async def create_job_listing(
 
     return new_job
 
+@router.get("/jobs", response_model=List[JobListingOut])
+async def get_all_jobs(
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(JobListing).where(JobListing.is_active == True))
+    jobs = result.scalars().all()
+    return jobs
+
 #  GET jobs posted by currently logged-in recruiter
 @router.get("/jobs/recruiter", response_model=List[JobListingOut])
 async def get_my_jobs(

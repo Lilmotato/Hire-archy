@@ -10,6 +10,7 @@ from db.database import Base, engine
 from db.mongo import ping_db  
 from utils.logger import setup_logger
 from routers import match_score
+from routers import search
 
 
 
@@ -61,6 +62,7 @@ app.include_router(users.router)
 app.include_router(upload.router, tags=["Resume Upload"])
 app.include_router(jobs.router, tags = ["Jobs"])
 app.include_router(match_score.router)
+app.include_router(search.router)
 
 @app.get("/", tags=["Public"])
 async def read_root():

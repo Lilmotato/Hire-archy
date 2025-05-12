@@ -1,8 +1,6 @@
-# utils/file_reader.py
-
 from io import BytesIO
 import docx
-import fitz  # PyMuPDF
+import fitz  
 
 async def extract_text_from_pdf(file_content: bytes) -> str:
     """Extract text from PDF file."""

@@ -20,3 +20,8 @@ class UserProfileResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class CandidateSearchResponse(UserProfileResponse):
+    location: Optional[str] = None
+    years_of_experience: Optional[int] = None
+    key_skills: Optional[list[str]] = None

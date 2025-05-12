@@ -49,9 +49,9 @@ async def generate_and_store_summary(user: User, db: AsyncSession):
             .values(embedding=embedding_vector)
         )
         await db.commit()
-        logger.info(f"✅ Embedding stored successfully for UID: {user.uid}")
+        logger.info(f"Embedding stored successfully for UID: {user.uid}")
     except Exception as e:
-        logger.error(f"❌ Embedding save failed for UID {user.uid}: {e}")
+        logger.error(f"Embedding save failed for UID {user.uid}: {e}")
         raise
 
 
@@ -64,44 +64,62 @@ async def update_my_profile(
 ):
     try:
         uid = current_user['uid']
-        logger.info(f"🔄 Updating profile for UID: {uid}")
+        logger.info(f"Updating profile for UID: {uid}")
 
         result = await db.execute(select(User).where(User.uid == uid))
         user = result.scalars().first()
         if not user:
-            logger.warning(f"⚠️ User not found: {uid}")
+            logger.warning(f"User not found: {uid}")
             raise HTTPException(status_code=404, detail="User not found.")
 
-        logger.debug(f"📂 Fetching parsed resume from MongoDB for UID: {uid}")
+        # Get parsed resume from MongoDB
+        # Get parsed resume from MongoDB
         mongo = get_mongo_client()
+        parsed_resume = {}
+
         parsed_doc = await mongo["mydb"]["Candidates"].find_one({"uid": user.uid})
-        raw_parsed = parsed_doc.get("parsed_resume", {}) if parsed_doc else {}
-        parsed_resume = json.loads(raw_parsed) if isinstance(raw_parsed, str) else raw_parsed
+        if parsed_doc and isinstance(parsed_doc.get("parsed_resume"), dict):
+            parsed_resume = parsed_doc["parsed_resume"]
+        else:
+            logger.warning(f"No valid parsed_resume found in MongoDB for UID: {user.uid}")
 
-        logger.debug(f"🔍 Parsed resume data: {parsed_resume}")
-
-        user.full_name = update_data.full_name or parsed_resume.get("full_name")
-        user.phone_number = update_data.phone_number or parsed_resume.get("phone_number")
-        user.location = update_data.location or parsed_resume.get("location")
-        user.years_of_experience = update_data.years_of_experience or parsed_resume.get("years_of_experience")
+        # Fallback-safe updates
+        user.full_name = update_data.full_name or parsed_resume.get("Name") or user.full_name
+        user.phone_number = update_data.phone_number or parsed_resume.get("Phone Number") or user.phone_number
+        user.location = update_data.location or parsed_resume.get("Location") or user.location
+        user.years_of_experience = update_data.years_of_experience or parsed_resume.get("Years of Experience") or user.years_of_experience
 
         if update_data.key_skills:
             user.key_skills = update_data.key_skills
-            logger.debug(f"✅ Using provided key skills for UID: {uid}")
-        elif "skills" in parsed_resume:
-            user.key_skills = parsed_resume["skills"]
-            logger.debug(f"📋 Fallback to parsed skills for UID: {uid}")
+            logger.debug(f"Using provided key skills for UID: {uid}")
+        elif "Skills" in parsed_resume:
+            user.key_skills = parsed_resume["Skills"]
+            logger.debug(f"Fallback to parsed skills for UID: {uid}")
+
+        # ✅ Check if all fields are now complete
+        if (
+            user.full_name and
+            user.phone_number and
+            user.location and
+            user.key_skills and isinstance(user.key_skills, list) and len(user.key_skills) > 0 and
+            user.years_of_experience is not None
+        ):
+            user.profile_completed = True
+            logger.info(f"Profile auto-marked complete for UID: {uid}")
+        else:
+            user.profile_completed = False
+            logger.info(f"Profile still incomplete for UID: {uid}")
 
         await db.commit()
         await db.refresh(user)
-        logger.info(f"💾 SQL profile updated for UID: {user.uid}")
+        logger.info(f"Profile updated for UID: {user.uid}")
 
         background_tasks.add_task(generate_and_store_summary, user, db)
-        logger.info(f"📥 Background task scheduled for embedding UID: {user.uid}")
+        logger.info(f"Background embedding task scheduled for UID: {user.uid}")
         return update_data
 
     except Exception as e:
-        logger.exception(f"❗ Update failed for UID: {current_user['uid']}")
+        logger.exception(f"Update failed for UID: {current_user['uid']}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update profile: {str(e)}"
