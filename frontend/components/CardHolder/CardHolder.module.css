@@ -1,0 +1,71 @@
+.main {
+    width: 100%;
+    background-color: var(--main-background-color);
+    color: var(--main-text-color);
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 1200px;
+}
+
+.wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+/* Each card takes up 48% on large screens, full on mobile */
+
+.wrapper>* {
+    flex: 1 1 48%;
+}
+
+/* Responsive breakpoints (copied from Navbar styles) */
+
+@media (max-width: 575px) {
+    .container {
+        max-width: 85%;
+    }
+
+    .wrapper>* {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    .container {
+        max-width: 540px;
+    }
+
+    .wrapper>* {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .container {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1150px;
+    }
+}

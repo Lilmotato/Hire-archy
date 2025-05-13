@@ -1,0 +1,31 @@
+.container {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.container h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #dc2626; /* red-600 */
+}
+
+.container p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  color: #4b5563; /* gray-700 */
+}
+
+.button {
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.button:hover {
+  background-color: #005ad1;
+}

@@ -12,7 +12,7 @@ async def process_resume_upload(file_content: bytes, content_type: str, candidat
     text = await extract_text(file_content, content_type)
 
     # 2. Send to LLM
-    parsed_resume = await parse_resume_with_dial(text)  # ✅ Correct function
+    parsed_resume = await parse_resume_with_dial(text)  
 
     # 3. Save parsed JSON to MongoDB
     mongo_client = get_mongo_client()
@@ -22,15 +22,15 @@ async def process_resume_upload(file_content: bytes, content_type: str, candidat
     await candidates.update_one(
         {"uid": candidate_id},
         {"$set": {"parsed_resume": parsed_resume}},
-        upsert=True  # ✅ Upsert (important) so first-time users are created
+        upsert=True 
     )
 
 
 async def save_parsed_resume_to_mongo(user_id: str, parsed_resume: dict):
     """Save parsed resume JSON under user ID."""
     mongo_client = get_mongo_client()
-    db = mongo_client["mydb"]  # ✅ your DB name
-    candidates = db["Candidates"]  # ✅ your collection name
+    db = mongo_client["mydb"]  
+    candidates = db["Candidates"]
 
     try:
         result = await candidates.update_one(
@@ -39,9 +39,9 @@ async def save_parsed_resume_to_mongo(user_id: str, parsed_resume: dict):
             upsert=True
         )
         if result.upserted_id:
-            logger.info(f"✅ Inserted new document for user_id: {user_id}")
+            logger.info(f" Inserted new document for user_id: {user_id}")
         else:
-            logger.info(f"✅ Updated existing document for user_id: {user_id}")
+            logger.info(f" Updated existing document for user_id: {user_id}")
     except Exception as e:
-        logger.exception(f"❌ Failed to save parsed resume for user_id={user_id}")
+        logger.exception(f" Failed to save parsed resume for user_id={user_id}")
         raise

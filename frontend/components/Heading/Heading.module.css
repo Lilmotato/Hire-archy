@@ -1,0 +1,41 @@
+.main {
+    padding: 1.5rem 0;
+}
+
+.heading {
+    font-size: 300%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 100%;
+}
+
+@media (max-width: 330px) {
+    .heading {
+        font-size: 150%;
+    }
+}
+
+@media (min-width: 331px) and (max-width: 575px) {
+    .heading {
+        font-size: 200%;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    .heading {
+        font-size: 250%;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .heading {
+        font-size: 300%;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .heading {
+        font-size: 300%;
+    }
+}

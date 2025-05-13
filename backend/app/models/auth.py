@@ -9,7 +9,7 @@ class UserSignupResponse(BaseModel):
 class UserInfo(BaseModel):
     uid: str
     email: EmailStr | None = None 
-    role: str | None = None # Role from custom claims
+    role: str | None = None 
     email_verified: bool | None = None
 
 class SignUpSchema(BaseModel):

@@ -10,9 +10,9 @@ from schemas.match_score import MatchScore
 from config.firebase import get_current_user  
 from schemas.jobs import JobListing  
 from services.jobs_service import store_job_summary_embedding 
-from db.database import get_db  # Async DB session for Postgres
-from models.job import JobListingCreate, JobListingOut  #  Pydantic request/response schemas
-from utils.dial_parser import get_text_embedding  #  LLM summary/embedding utility
+from db.database import get_db  
+from models.job import JobListingCreate, JobListingOut  
+from utils.dial_parser import get_text_embedding  
 from db.mongo import get_mongo_client  
 from utils.logger import setup_logger
 

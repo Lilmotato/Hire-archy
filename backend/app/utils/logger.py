@@ -4,7 +4,7 @@ def setup_logger(name: str = __name__):
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(name)
 
-    if not logger.handlers:  # Prevent adding multiple handlers
+    if not logger.handlers:  
         handler = logging.StreamHandler()
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

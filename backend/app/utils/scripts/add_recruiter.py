@@ -3,35 +3,35 @@ import asyncio
 import logging
 from firebase_admin import auth, credentials, initialize_app
 
-# Setup logger
+
 logger = logging.getLogger("add_recruiter")
 logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 logger.addHandler(console_handler)
 
-# ✅ Initialize Firebase app
+
 try:
-    # Load credentials from environment variable or local file path
-    cred = credentials.Certificate("src\config\serviceAccountKey.json")
+
+    cred = credentials.Certificate("app\config\serviceAccountKey.json")
     initialize_app(cred)
 except Exception as e:
-    logger.error(f"🔥 Failed to initialize Firebase Admin SDK: {e}")
+    logger.error(f"Failed to initialize Firebase Admin SDK: {e}")
     sys.exit(1)
 
 async def create_recruiter(email: str, password: str):
     try:
         user = auth.create_user(email=email, password=password)
-        logger.info(f"✅ Firebase user created with UID: {user.uid}")
+        logger.info(f"Firebase user created with UID: {user.uid}")
 
         auth.set_custom_user_claims(user.uid, {"role": "recruiter"})
-        logger.info("✅ Custom claims set: recruiter")
+        logger.info(" Custom claims set: recruiter")
 
-        print(f"\nRecruiter created successfully ✅\nUID: {user.uid}")
+        print(f"\nRecruiter created successfully \nUID: {user.uid}")
         return user.uid
     except Exception as e:
-        logger.error(f"🔥 Failed to create recruiter: {e}")
-        print(f"\n❌ Failed to create recruiter: {e}")
+        logger.error(f" Failed to create recruiter: {e}")
+        print(f"\nFailed to create recruiter: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

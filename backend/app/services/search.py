@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import array
 from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.user import User
 from typing import List, Optional
+from sqlalchemy import or_, func
 
 
 async def filter_candidates(
@@ -24,11 +25,14 @@ async def search_candidates(
     filters = []
 
     if skills:
-        filters.append(User.key_skills.op("&&")(array(skills)))  
+        for skill in skills:
+            filters.append(
+                func.array_to_string(User.key_skills, ',').ilike(f"%{skill.lower()}%")
+            )
 
     if location:
-        filters.append(User.location == location)
-
+        filters.append(func.lower(User.location).ilike(f"%{location.lower()}%"))
+            
     if min_experience is not None:
         filters.append(User.years_of_experience >= min_experience)
 

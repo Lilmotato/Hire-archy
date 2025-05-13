@@ -12,9 +12,6 @@ from utils.logger import setup_logger
 from routers import match_score
 from routers import search
 
-
-
-
 logger = setup_logger()
 
 @asynccontextmanager

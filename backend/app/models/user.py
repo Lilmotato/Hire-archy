@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
@@ -16,7 +17,7 @@ class UserProfileResponse(BaseModel):
     phone_number: str | None = None
     role: str
     resume_url: str | None = None
-    created_at: str | None = None  # or datetime if you prefer
+    created_at: Optional[datetime] = None
 
     class Config:
         orm_mode = True

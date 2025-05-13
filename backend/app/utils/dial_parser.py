@@ -33,7 +33,7 @@ def get_text_embedding(text: str) -> list[float]:
         data = response.json()
         embedding = data["data"][0]["embedding"]
         print(f"Received embedding of length {len(embedding)}")
-        print(f"First 10 values: {embedding[:10]}") #testing 
+        print(f"First 10 values: {embedding[:10]}") 
         return embedding
     except Exception as e:
         print("Error parsing response:")

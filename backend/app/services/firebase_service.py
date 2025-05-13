@@ -1,4 +1,4 @@
-# app/services/firebase_service.py
+
 import os
 import requests
 from firebase_admin import auth
@@ -19,7 +19,7 @@ async def signup_candidate_service(
     db: AsyncSession  
 ) -> UserSignupResponse:
     try:
-        # Create Firebase user
+        
         new_user = auth.create_user(
             email=user_data.email,
             password=user_data.password,
@@ -27,10 +27,10 @@ async def signup_candidate_service(
             disabled=False
         )
 
-        # Set Firebase custom claims
+        
         auth.set_custom_user_claims(new_user.uid, {'role': 'candidate'})
 
-        # Add new user to PostgreSQL
+        
         user_record = User(
             uid=new_user.uid,
             email=new_user.email,
@@ -41,7 +41,7 @@ async def signup_candidate_service(
         )
 
         db.add(user_record)
-        await db.commit()       #use await because it's AsyncSession
+        await db.commit()       
         await db.refresh(user_record)
 
         return UserSignupResponse(
@@ -63,7 +63,7 @@ async def signup_candidate_service(
         )
 
 
-#login logic 
+
 async def login_service(user_data: LoginSchema) -> dict:
     FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")
     if not FIREBASE_API_KEY:

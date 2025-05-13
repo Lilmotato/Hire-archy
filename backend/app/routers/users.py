@@ -30,7 +30,7 @@ async def read_users_me(current_user: dict = Depends(get_current_user)):
 
 async def generate_and_store_summary(user: User, db: AsyncSession):
     try:
-        logger.info(f"📦 Starting summary generation for UID: {user.uid}")
+        logger.info(f"Starting summary generation for UID: {user.uid}")
 
         summary_text = (
             f"Location: {user.location or 'N/A'}\n"
@@ -38,10 +38,10 @@ async def generate_and_store_summary(user: User, db: AsyncSession):
             f"Key Skills: {', '.join(user.key_skills or [])}"
         )
 
-        logger.debug(f"📝 Summary text for embedding:\n{summary_text}")
+        logger.debug(f"Summary text for embedding:\n{summary_text}")
 
         embedding_vector = get_text_embedding(summary_text)
-        logger.info(f"🧠 Embedding generated for UID: {user.uid}")
+        logger.info(f"Embedding generated for UID: {user.uid}")
 
         await db.execute(
             update(User)
@@ -73,7 +73,6 @@ async def update_my_profile(
             raise HTTPException(status_code=404, detail="User not found.")
 
         # Get parsed resume from MongoDB
-        # Get parsed resume from MongoDB
         mongo = get_mongo_client()
         parsed_resume = {}
 
@@ -89,14 +88,14 @@ async def update_my_profile(
         user.location = update_data.location or parsed_resume.get("Location") or user.location
         user.years_of_experience = update_data.years_of_experience or parsed_resume.get("Years of Experience") or user.years_of_experience
 
-        if update_data.key_skills:
+        if update_data.key_skills and any(skill.strip() for skill in update_data.key_skills):
             user.key_skills = update_data.key_skills
             logger.debug(f"Using provided key skills for UID: {uid}")
         elif "Skills" in parsed_resume:
             user.key_skills = parsed_resume["Skills"]
             logger.debug(f"Fallback to parsed skills for UID: {uid}")
 
-        # ✅ Check if all fields are now complete
+        #Check complete
         if (
             user.full_name and
             user.phone_number and

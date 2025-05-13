@@ -1,4 +1,3 @@
-# app/routers/auth.py
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Header, Request, status
 from httpx import request
@@ -14,7 +13,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post("/signup/candidate", response_model=UserSignupResponse)
 async def signup_candidate(
     user_data: SignUpSchema = Body(...),
-    db: AsyncSession = Depends(get_db)  # Inject db here!
+    db: AsyncSession = Depends(get_db)  
 ):
     return await signup_candidate_service(user_data, db)
 

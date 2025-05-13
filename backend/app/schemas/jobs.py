@@ -20,6 +20,6 @@ class JobListing(Base):
     recruiter_id = Column(String, nullable=False)
     job_summary = Column(String, nullable=True)
 
-    # New fields
-    embedding = Column(Vector(1536))  # For matching candidates to job
-    applied_user_ids = Column(ARRAY(String), default=[])  # Recruiter candidate pool
+    
+    embedding = Column(Vector(1536))  
+    applied_user_ids = Column(ARRAY(String), default=[])  
